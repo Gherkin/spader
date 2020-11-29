@@ -3,37 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <title>Apa</title>
+    <link rel="stylesheet" href="/static/main.css">
 </head>
 <body>
 <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
-<input type="text" id="user">
-<input type="text" id="room">
-<button id="join">join</button>
-<button id="btn">-1</button>
+<div class="declare">
+    <input class="declare">
+    <button class="declare">declare</button>
+</div>
+
+
+<ul id="players">
+</ul>
+
+
+
+
+
+
+
+<!-- The Modal -->
+<div id="joinModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+      <span class="close">&times;</span>
+      <p>join room</p>
+      <input type="text" id="user" value="gurka">
+      <input type="text" id="room" value="1">
+      <button id="join">join</button>
+  </div>
+
+</div>
+
+
+<div class="hand">
+</div>
 <script type="text/javascript" charset="utf-8">
     var socket = io();
     var button = document.querySelector('button#btn');
     var counter = -1;
+    var room = -1;
+    var user = -1;
+
+
     socket.on('connect', function() {
         socket.emit('my event', {data: 'I\'m connected!'});
     });
 
-    socket.on('count', function(count) {
-        counter = count;
-        button.innerHTML = counter;
+    window.addEventListener('load', function(event) {
+        e = document.querySelector('#joinModal');
+        e.style.display = "block";
+    });
+
+    socket.on('hand', function(data) {
+        let hand = document.querySelector('div.hand');
+        console.log('got hand');
+        let cards = data['cards'].map(x => '/static/cards/' + x[1] + x[0] + '.svg').forEach(function (source) {
+            let node = document.createElement('img');
+            node.setAttribute('class', 'card');
+            node.setAttribute('src', source);
+            hand.appendChild(node);
+        });
+
+        console.log(data);
+    });
+
+
+    socket.on('declare', function(c) {
+        console.log('do declare')
+        document.querySelector('div.declare').style.display = 'block';
     });
 
     socket.on('new_user', function(msg) {
         console.log('new user!');
         console.log(msg);
+        let e = document.querySelector('#players');
+        let node = document.createElement('li');
+        node.setAttribute('class', 'player');
+        node.innerText = msg;
+        e.appendChild(node);
     });
 
+    document.querySelector('button.declare').addEventListener('click', function (event) {
+        socket.emit('declare',
+                {
+                    room: room,
+                    n: parseInt(document.querySelector('input.declare').value)
+                }
+        );
+        document.querySelector('div.declare').style.display = 'none';
+    });
     document.querySelector('button#join').addEventListener('click', function (event) {
+        room = document.querySelector('input#room').value;
+        user = document.querySelector('input#user').value;
         socket.emit('join',
                 {
-                    user: document.querySelector('input#user').value,
-                    room: document.querySelector('input#room').value
+                    user: user,
+                    room: room
                 });
+        document.querySelector('#joinModal').style.display = 'none';
     });
 
     button.addEventListener('click', event => {

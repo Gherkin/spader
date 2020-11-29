@@ -1,12 +1,32 @@
 import random
 
 class Card(object):
+    HEARTS = 'H'
+    SPADES = 'S'
+    DIAMONDS = 'D'
+    CLUBS = 'C'
+
     def __init__(self, suit, val):
         self.suit = suit
         self.val = val
 
     def show(self):
         print('{} of {}'.format(self.val,self.suit))
+
+    def __str__(self):
+        return '{} of {}'.format(self.val,self.suit)
+
+    def __eq__(self, other):
+        if self.suit != other.suit:
+            return False
+
+        if self.val != other.val:
+            return False
+
+        return True
+
+    def serialize(self):
+        return [self.suit, self.val]
 
 
 class Deck(object):
@@ -15,7 +35,7 @@ class Deck(object):
         self.build()
 
     def build(self):
-        for i in ['spades','clubs','diamonds','hearts']:
+        for i in ['H', 'S', 'D', 'C']:
             for b in range(1,14):
                 self.cards.append(Card(i,b))
 
@@ -36,10 +56,19 @@ class Player(object):
     def __init__(self, name):
         self.name = name
         self.hand = []
+        self.n = 0
+
+    def declare(self, n):
+        self.n = n
 
     def draw(self, deck):
         self.hand.append(deck.drawCard())
         return self
+
+    def has(self, card):
+        if card in self.hand:
+            return True
+        return False
 
     def draw_n(self, deck, num):
         for _ in range(0, num):
@@ -52,14 +81,22 @@ class Player(object):
     def placeCard(self):
         return self.hand.pop
 
-deck = Deck()
-deck.shuffle()
+    def serialize(self):
+        json = {}
+        json['name'] = self.name
+        json['cards'] = [x.serialize() for x in self.hand]
+        return json
 
 
-player1 = Player('oscar')
-for i in range(1,14):
-    player1.draw(deck)
+if __name__ == '__main__':
+    deck = Deck()
+    deck.shuffle()
 
-player1.showHand()
-print('------------')
-#deck.show()
+
+    player1 = Player('oscar')
+    for i in range(1,14):
+        player1.draw(deck)
+
+    player1.showHand()
+    print('------------')
+    #deck.show()
