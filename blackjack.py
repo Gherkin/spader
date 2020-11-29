@@ -41,6 +41,10 @@ class Player(object):
         self.hand.append(deck.drawCard())
         return self
 
+    def draw_n(self, deck, num):
+        for _ in range(0, num):
+            self.draw(deck)
+
     def showHand(self):
         for card in self.hand:
             card.show()

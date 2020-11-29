@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, send, emit, join_room
 from collections import defaultdict
+from .blackjack import Deck, Player
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -26,6 +28,12 @@ def apa(clicks):
     emit('count', count, broadcast=True)
 
 def start_game(room):
+    deck = Deck()
+    deck.shuffle()
+
+    for i in range(0, len(rooms[room])):
+        rooms[room][i]['player'] = Player(rooms[room][i]['user'])
+        rooms[room][i]['player'].draw_n(deck, 13)
 
 
 @socketio.on('join')
