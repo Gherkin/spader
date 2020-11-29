@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Apa</title>
+</head>
+<body>
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+<input type="text" id="user">
+<input type="text" id="room">
+<button id="join">join</button>
+<button id="btn">-1</button>
+<script type="text/javascript" charset="utf-8">
+    var socket = io();
+    var button = document.querySelector('button#btn');
+    var counter = -1;
+    socket.on('connect', function() {
+        socket.emit('my event', {data: 'I\'m connected!'});
+    });
+
+    socket.on('count', function(count) {
+        counter = count;
+        button.innerHTML = counter;
+    });
+
+    socket.on('new_user', function(msg) {
+        console.log('new user!');
+        console.log(msg);
+    });
+
+    document.querySelector('button#join').addEventListener('click', function (event) {
+        socket.emit('join',
+                {
+                    user: document.querySelector('input#user').value,
+                    room: document.querySelector('input#room').value
+                });
+    });
+
+    button.addEventListener('click', event => {
+        socket.emit('click', counter + 1);
+    })
+</script>
+
+</body>
+</html>
